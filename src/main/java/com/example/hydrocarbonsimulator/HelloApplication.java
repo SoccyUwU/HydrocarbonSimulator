@@ -12,7 +12,7 @@ public class HelloApplication extends Application
     {
         GridPane base = new GridPane();
         Scene scene = new Scene(base, 320, 240);
-        stage.setTitle("test tf");
+        stage.setTitle("test t");
         stage.setScene(scene);
         stage.show();
     }
