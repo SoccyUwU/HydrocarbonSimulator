@@ -8,7 +8,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-public class HelloApplication extends Application
+public class SimulatorMain extends Application
 {
     final static int screenWidth = 320;
     final static int screenHeight = 240;
@@ -27,7 +27,7 @@ public class HelloApplication extends Application
 
         Font elementFont = new Font(20);
         lewisContext.setFont(elementFont);
-        lewisContext.strokeText("C", 50, 40);
+        lewisContext.strokeText("C", 50, 50);
     }
 
     public static void main(String[] args)
