@@ -14,23 +14,38 @@ public class DualMap<Tkey, Tvalue>
     private ArrayList<Tkey> keys;
 
     /**
+     * called whenever it is detected that there aren't the same number of values and keys
+     *
+     * in other words, when the keys and values mismatch somehow
+     * @throws IllegalStateException
+     */
+    private void panic() throws IllegalStateException
+    {
+        throw new IllegalStateException("Number of values and keys mismatch\nSeriously how did you get here");
+    }
+
+    /**
      * fetch a value by the key
      * @param key
-     * @return the corresponding value
+     * @return the corresponding value, or null if none found
      */
     public Tvalue seekByKey(Tkey key)
     {
         int temp = keys.indexOf(key);
+        if(temp == -1) // if none found
+            return null;
         return values.get(temp);
     }
     /**
      * fetch a key by the value
      * @param value
-     * @return the corresponding key
+     * @return the corresponding key, or null if none found
      */
     public Tkey seekByValue(Tvalue value)
     {
         int temp = values.indexOf(value);
+        if(temp == 0) // if none found
+            return null;
         return keys.get(temp);
     }
 
@@ -43,5 +58,13 @@ public class DualMap<Tkey, Tvalue>
     {
         values.add(value);
         keys.add(key);
+    }
+    public int size()
+    {
+        return keys.size();
+    }
+    public boolean empty()
+    {
+        return this.size() == 0;
     }
 }
