@@ -14,10 +14,9 @@ public class DualMap<Tkey, Tvalue>
     private ArrayList<Tkey> keys;
 
     /**
-     * called whenever it is detected that there aren't the same number of values and keys
-     *
+     * called whenever it is detected that there aren't the same number of values and keys<p></p></p>
      * in other words, when the keys and values mismatch somehow
-     * @throws IllegalStateException
+     * @throws IllegalStateException whenever it's called
      */
     private void panic() throws IllegalStateException
     {
