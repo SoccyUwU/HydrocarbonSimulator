@@ -7,6 +7,8 @@ import java.util.Objects;
 
 public class Element
 {
+    // in hydrocarbons we've learned, an element only connects to at most four other
+    private Element[] bonds = new Element[4];
     // all elements will be drawn on the same canvas, the context of which is here
     private static GraphicsContext elementContext = null;
     // note that keys are shorter (C, Ca, H) while values are full (Carbon, Calcium)
@@ -15,11 +17,6 @@ public class Element
     private String fullName = "morbium";
     // abbreviation name is according to the laws
     private String name = "M";
-
-    private String abbreviation(String full) throws IllegalArgumentException
-    {
-        return "work in progress: wait for handmade map";
-    }
 
     public Element(String name) throws IllegalArgumentException
     {
@@ -61,5 +58,10 @@ public class Element
     public static void setElementContext(GraphicsContext context)
     {
         elementContext = context;
+    }
+
+    public void draw(int width, int height)
+    {
+        elementContext.strokeText(name, width, height);
     }
 }

@@ -8,6 +8,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+
 public class SimulatorMain extends Application
 {
     final static int screenWidth = 320;
@@ -27,7 +29,25 @@ public class SimulatorMain extends Application
 
         Font elementFont = new Font(20);
         lewisContext.setFont(elementFont);
-        lewisContext.strokeText("C", 50, 50);
+
+        // placeholder for now: to test parsing before making ui
+        String IUPACname = new String("but-1-ene");
+        // bunch of variables to track properties
+        boolean alkane = false;
+        ArrayList<Integer> doubleBonds = new ArrayList<Integer>();
+        ArrayList<Integer> tripleBonds = new ArrayList<Integer>();
+
+        // if the element ends in -ane: alkane
+        if(IUPACname.endsWith("ane"))
+        {
+            alkane = true;
+        }
+        else if(IUPACname.endsWith("ene")) // alkene then
+        {
+            int end = IUPACname.lastIndexOf("-");
+            int start = IUPACname.lastIndexOf("-", end-1);
+            // todo: parse list of numbers separated by , here
+        }
     }
 
     public static void main(String[] args)
