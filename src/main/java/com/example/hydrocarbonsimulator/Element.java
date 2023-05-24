@@ -3,12 +3,11 @@ package com.example.hydrocarbonsimulator;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class Element
 {
     // in hydrocarbons we've learned, an element only connects to at most four other
-    private Element[] bonds = new Element[4];
+    private ArrayList<bondInfo> bonds = new ArrayList<>();
     // all elements will be drawn on the same canvas, the context of which is here
     private static GraphicsContext elementContext = null;
     // note that keys are shorter (C, Ca, H) while values are full (Carbon, Calcium)
@@ -38,7 +37,7 @@ public class Element
             String longName = nameList.seekByKey(name);
             if(longName == null)
             {
-                throw new IllegalArgumentException("That's not even an element that goes in hydrocarbons");
+                throw new IllegalArgumentException("Unknown abbreviation: " + name);
             }
             this.name = name;
             this.fullName = longName;
@@ -48,7 +47,7 @@ public class Element
             String shortName = nameList.seekByValue(name);
             if(shortName == null)
             {
-                throw new IllegalArgumentException("Not an element of concern");
+                throw new IllegalArgumentException("Unknown name: " + name);
             }
             this.fullName = name;
             this.name = shortName;
@@ -63,5 +62,21 @@ public class Element
     public void draw(int width, int height)
     {
         elementContext.strokeText(name, width, height);
+    }
+
+    public void bondWith(Element bondElement, int bondNumber) throws IllegalStateException
+    {
+        if(bonds.size() > 4)
+            throw new IllegalStateException(this.fullName + " already has 4 bonds");
+        this.bonds.add(new bondInfo(bondNumber, bondElement));
+    }
+    public ArrayList<bondInfo> getBonds()
+    {
+        return this.bonds;
+    }
+
+    public boolean isElement(String name)
+    {
+        return this.name == nameList.seekByValue(name) || this.name == nameList.seekByKey(name);
     }
 }
