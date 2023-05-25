@@ -22,14 +22,29 @@ public class SimulatorMain extends Application
      */
     public void constructMain(Compound com)
     {
+        // TODO: 2023-05-24 This is tricky since the prefix is actually in the middle
+        com.lengthMain = prefixToNum(com.name.substring(0, com.name.indexOf("ene")));
+
         for(int i = 0; i < com.lengthMain; ++i)
         {
             Element temp = new Element("C");
             com.elements.add(temp);
         }
+        for(int i = 0; i < com.lengthMain; ++i)
+        {
+            com.bondNumbers.add(1);
+        }
+
+        if(com.name.contains("ene"))
+        {
+            com.parseAlkene();
+        }
+
         for(int i = 0; i < com.lengthMain-1; ++i)
         {
-            com.elements.get(i).bondWith(com.elements.get(i+1), com.bondNumbers.get(i));
+            com.elements.get(i).bondWith(
+                    com.elements.get(i+1),
+                    com.bondNumbers.get(i));
         }
     }
 
@@ -68,14 +83,15 @@ public class SimulatorMain extends Application
         lewisContext.setFont(elementFont);
 
         // placeholder for now: to test parsing before making ui
-        String IUPACname = new String("but-1-ene");
+        String IUPACname = new String("hexa-1,2,5-ene");
         // bunch of variables to track properties
         Compound sample = new Compound();
 
-
+        IUPACname = removeSpace(IUPACname);
+        sample.name = IUPACname;
 
         // if the compound ends in -ane: alkane
-        if(IUPACname.endsWith("ane"))
+        if(sample.name.endsWith("ane"))
         {
             // compounds ending in -ane are also incredibly simple
             sample.lengthMain = prefixToNum(IUPACname.substring(0, IUPACname.length()-3));
@@ -84,18 +100,12 @@ public class SimulatorMain extends Application
                 sample.bondNumbers.add(1);
             }
         }
-        else if(IUPACname.endsWith("ene")) // alkene then
-        {
-            int end = IUPACname.lastIndexOf("-");
-            int start = IUPACname.lastIndexOf("-", end-1);
-            ArrayList<Integer> temp = parseCommaNumList(IUPACname.substring(start+1, end));
-            // TODO: parse list of numbers separated by , here
-            // update, parseCommaNumList is a wip
-        }
         constructMain(sample);
         // TODO: 2023-05-23 Do other constructs dependent on type of hydrocarbon
         constructH(sample);
-        System.out.println(removeSpace("   fuck  you  s "));
+
+        // debug
+        System.out.println(sample.bondNumbers);
     }
 
     public static void main(String[] args)
@@ -112,7 +122,8 @@ public class SimulatorMain extends Application
             case "prop": return 3;
             case "but": return 4;
             case "pent": return 5;
-            case "hex": return 6;
+            case "hex":
+            case "hexa": return 6;
             case "hept": return 7;
             case "oct": return 8;
             case "non": return 9;
@@ -121,13 +132,24 @@ public class SimulatorMain extends Application
         }
     }
 
-    public static ArrayList<Integer> parseCommaNumList(String str)
+    public static ArrayList<Integer> parseCommaNumList(String str) throws IllegalArgumentException
     { // well fuck me if it's not correct
         // TODO: 2023-05-23 Actually verify that the list is properly formatted
-        ArrayList<Integer> temp = new ArrayList<Integer>();
-        for(int i = 0; i < str.length(); i += 2)
+        ArrayList<Integer> temp = new ArrayList<>();
+        for(int i = 0; i < str.length(); ++i)
         {
-            temp.add(Integer.parseInt(str.substring(i, i+1)));
+            if(i % 2 == 0 && Character.isDigit(str.charAt(i)))
+            {
+                temp.add(Integer.parseInt(str.substring(i, i + 1)));
+            }
+            else if(i % 2 == 1 && str.charAt(i) == ',')
+            {
+                ;
+            }
+            else
+            {
+                throw new IllegalArgumentException("numbering isn't valid: alternate between digits and commas");
+            }
         }
         return temp;
     }

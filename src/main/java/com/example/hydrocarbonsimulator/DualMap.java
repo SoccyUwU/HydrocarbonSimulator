@@ -10,8 +10,8 @@ import java.util.ArrayList;
  */
 public class DualMap<Tkey, Tvalue>
 {
-    private ArrayList<Tvalue> values;
-    private ArrayList<Tkey> keys;
+    private ArrayList<Tvalue> values = new ArrayList<>();
+    private ArrayList<Tkey> keys = new ArrayList<>();
 
     /**
      * called whenever it is detected that there aren't the same number of values and keys<p></p></p>
@@ -43,7 +43,7 @@ public class DualMap<Tkey, Tvalue>
     public Tkey seekByValue(Tvalue value)
     {
         int temp = values.indexOf(value);
-        if(temp == 0) // if none found
+        if(temp == -1) // if none found
             return null;
         return keys.get(temp);
     }
@@ -64,6 +64,6 @@ public class DualMap<Tkey, Tvalue>
     }
     public boolean empty()
     {
-        return this.size() == 0;
+        return keys == null || this.size() == 0;
     }
 }
