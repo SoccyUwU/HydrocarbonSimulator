@@ -16,56 +16,6 @@ public class SimulatorMain extends Application
     final static int screenWidth = 320;
     final static int screenHeight = 240;
 
-    /**
-     * Constructs the main chain of carbons and bonds
-     * @param com
-     */
-    public void constructMain(Compound com)
-    {
-        // TODO: 2023-05-24 This is tricky since the prefix is actually in the middle
-        com.lengthMain = prefixToNum(com.name.substring(0, com.name.indexOf("ene")));
-
-        for(int i = 0; i < com.lengthMain; ++i)
-        {
-            Element temp = new Element("C");
-            com.elements.add(temp);
-        }
-        for(int i = 0; i < com.lengthMain; ++i)
-        {
-            com.bondNumbers.add(1);
-        }
-
-        if(com.name.contains("ene"))
-        {
-            com.parseAlkene();
-        }
-
-        for(int i = 0; i < com.lengthMain-1; ++i)
-        {
-            com.elements.get(i).bondWith(
-                    com.elements.get(i+1),
-                    com.bondNumbers.get(i));
-        }
-    }
-
-    /**
-     * Fills in the rest of the bonds with hydrogens
-     * @param com
-     */
-    public void constructH(Compound com)
-    {
-        for(Element ele : com.elements)
-        {
-            if(ele.isElement("O") || ele.isElement("H"))
-            {
-                while (ele.getBonds().size() < 4)
-                {
-                    ele.bondWith(new Element("H"), 1);
-                }
-            }
-        }
-    }
-
     @Override
     public void start(Stage stage)
     {
@@ -90,19 +40,8 @@ public class SimulatorMain extends Application
         IUPACname = removeSpace(IUPACname);
         sample.name = IUPACname;
 
-        // if the compound ends in -ane: alkane
-        if(sample.name.endsWith("ane"))
-        {
-            // compounds ending in -ane are also incredibly simple
-            sample.lengthMain = prefixToNum(IUPACname.substring(0, IUPACname.length()-3));
-            for(int i = 0; i < sample.lengthMain - 1; ++i)
-            {
-                sample.bondNumbers.add(1);
-            }
-        }
-        constructMain(sample);
-        // TODO: 2023-05-23 Do other constructs dependent on type of hydrocarbon
-        constructH(sample);
+        sample.parseMainPath();
+        sample.populateH();
 
         // debug
         System.out.println(sample.bondNumbers);
@@ -133,8 +72,7 @@ public class SimulatorMain extends Application
     }
 
     public static ArrayList<Integer> parseCommaNumList(String str) throws IllegalArgumentException
-    { // well fuck me if it's not correct
-        // TODO: 2023-05-23 Actually verify that the list is properly formatted
+    {
         ArrayList<Integer> temp = new ArrayList<>();
         for(int i = 0; i < str.length(); ++i)
         {

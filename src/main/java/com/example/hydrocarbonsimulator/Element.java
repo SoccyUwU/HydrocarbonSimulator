@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class Element
 {
+
     // in hydrocarbons we've learned, an element only connects to at most four other
     private ArrayList<bondInfo> bonds = new ArrayList<>();
     // all elements will be drawn on the same canvas, the context of which is here
