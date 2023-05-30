@@ -20,7 +20,11 @@ public class Compound
 
     public void draw(GraphicsContext context)
     {
-
+        // first we sort all the bonds in elements to make drawing easier
+        for(Element ele : this.elements)
+        {
+            ele.sortBonds();
+        }
     }
 
     /**

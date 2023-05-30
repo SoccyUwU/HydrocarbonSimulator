@@ -3,6 +3,7 @@ package com.example.hydrocarbonsimulator;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Element
 {
@@ -17,6 +18,47 @@ public class Element
     private String fullName = "morbium";
     // abbreviation name is according to the laws
     private String name = "M";
+
+    /**
+     * Special comp function to prioritize elements as described in sortBonds()
+     * @param a
+     * @param b
+     * @return
+     */
+    private boolean compElement(Element a, Element b)
+    {
+        int aNum, bNum;
+        if(a.name == "C")
+            aNum = 0;
+        else if(a.name == "H")
+            aNum = 2;
+        else
+            aNum = 1;
+        if(b.name == "C")
+            bNum = 0;
+        else if(b.name == "H")
+            bNum = 2;
+        else
+            bNum = 1;
+        return aNum < bNum;
+    }
+
+    /**
+     * This sorts bonds in order from C to functional group to H
+     */
+    public void sortBonds()
+    {
+        for(int j = bonds.size(); j > 0; --j)
+        {
+            for (int i = 0; i < j-1; ++i)
+            {
+                if(compElement(bonds.get(i).end(), bonds.get(i+1).end()))
+                {
+                    Collections.swap(bonds, i, i+1);
+                }
+            }
+        }
+    }
 
     public Element(String name) throws IllegalArgumentException
     {
