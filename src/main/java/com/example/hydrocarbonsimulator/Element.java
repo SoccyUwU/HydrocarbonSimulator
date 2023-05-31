@@ -3,15 +3,16 @@ package com.example.hydrocarbonsimulator;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class Element
 {
 
     // in hydrocarbons we've learned, an element only connects to at most four other
-    private ArrayList<bondInfo> bonds = new ArrayList<>();
-    // all elements will be drawn on the same canvas, the context of which is here
-    private static GraphicsContext elementContext = null;
+    private ArrayList<bondInfo> bonds = new ArrayList<>(4);
+    private boolean[] bonded = new boolean[]{false, false, false, false};
+    private int bondCount = 0; // max is 4
     // note that keys are shorter (C, Ca, H) while values are full (Carbon, Calcium)
     private static DualMap<String, String> nameList = new DualMap<String, String>();
     // full name is always fully lower case
@@ -25,18 +26,18 @@ public class Element
      * @param b
      * @return
      */
-    private boolean compElement(Element a, Element b)
+    private boolean compElement(bondInfo a, bondInfo b)
     {
         int aNum, bNum;
-        if(a.name == "C")
+        if(a.end().name == "C")
             aNum = 0;
-        else if(a.name == "H")
+        else if(a.end().name == "H")
             aNum = 2;
         else
             aNum = 1;
-        if(b.name == "C")
+        if(b.end().name == "C")
             bNum = 0;
-        else if(b.name == "H")
+        else if(b.end().name == "H")
             bNum = 2;
         else
             bNum = 1;
@@ -52,7 +53,7 @@ public class Element
         {
             for (int i = 0; i < j-1; ++i)
             {
-                if(compElement(bonds.get(i).end(), bonds.get(i+1).end()))
+                if(!compElement(bonds.get(i), bonds.get(i+1)))
                 {
                     Collections.swap(bonds, i, i+1);
                 }
@@ -97,21 +98,30 @@ public class Element
         }
     }
 
-    public static void setElementContext(GraphicsContext context)
+    public void draw(GraphicsContext context, int width, int height)
     {
-        elementContext = context;
+        context.strokeText(name, width, height);
     }
 
-    public void draw(int width, int height)
+    /**
+     *
+     * @param bondElement
+     * @param bondNumber
+     * @param position 0 is right 1 is left 2 is up 3 is down
+     * @throws IllegalStateException
+     */
+    public void bondWith(Element bondElement, int bondNumber, int position) throws IllegalStateException
     {
-        elementContext.strokeText(name, width, height);
-    }
-
-    public void bondWith(Element bondElement, int bondNumber) throws IllegalStateException
-    {
-        if(bonds.size() > 4)
-            throw new IllegalStateException(this.fullName + " already has 4 bonds");
-        this.bonds.add(new bondInfo(bondNumber, bondElement));
+        // fill bonds if it's not already sized enough with garbage info
+        while(this.bonds.size() < 4)
+            this.bonds.add(new bondInfo(77943, new Element("O")));
+        if(this.bonded[position])
+            return; // do nothing if it's already bonded
+        if(this.bondCount >= 4)
+            return; // do nothing if bonds are full
+        this.bonds.set(position, new bondInfo(bondNumber, bondElement));
+        this.bonded[position] = true;
+        this.bondCount += bondNumber;
     }
     public ArrayList<bondInfo> getBonds()
     {

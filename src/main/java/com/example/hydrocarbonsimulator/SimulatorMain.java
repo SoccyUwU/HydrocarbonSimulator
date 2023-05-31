@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -13,8 +14,8 @@ import java.util.ArrayList;
 
 public class SimulatorMain extends Application
 {
-    final static int screenWidth = 320;
-    final static int screenHeight = 240;
+    final static int screenWidth = 1000;
+    final static int screenHeight = 800;
 
     @Override
     public void start(Stage stage)
@@ -31,17 +32,20 @@ public class SimulatorMain extends Application
 
         Font elementFont = new Font(20);
         lewisContext.setFont(elementFont);
+        lewisContext.setFill(Color.LIGHTPINK);
+        lewisContext.fillRect(0, 0, screenWidth, screenHeight);
 
         // placeholder for now: to test parsing before making ui
-        String IUPACname = new String("hexa-1,2,5-ene");
-        // bunch of variables to track properties
+        String IUPACname = new String("hept-1,2-ene-5-yne");
         Compound sample = new Compound();
 
         IUPACname = removeSpace(IUPACname);
         sample.name = IUPACname;
+        lewisContext.strokeText("IUPAC name: " + IUPACname, 0, screenHeight-20);
 
         sample.parseMainPath();
         sample.populateH();
+        sample.draw(lewisContext);
 
         // debug
         System.out.println(sample.bondNumbers);

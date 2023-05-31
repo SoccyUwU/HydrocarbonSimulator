@@ -18,13 +18,86 @@ public class Compound
 
     ArrayList<Element> elements = new ArrayList<Element>();
 
+    // bunch of drawing related stuff
+    final static int gap = 68; // simon told me to use this number
+    final static int letterSize = 15; // looks nice
+    final static int startSize = 100; // looks nice
+
+
     public void draw(GraphicsContext context)
     {
-        // first we sort all the bonds in elements to make drawing easier
-        for(Element ele : this.elements)
+        for(int i = 0; i < elements.size(); ++i)
         {
-            ele.sortBonds();
+            elements.get(i).draw(context, 100 + gap * i, 100);
+            ArrayList<bondInfo> tempBonds = elements.get(i).getBonds();
+
+            // TODO: 2023-05-31 Finish this bond drawing to look good and apply on all bonds 
+
+            // this goes RIGHT
+            if(tempBonds.get(0).end().isElement("C")
+                    || tempBonds.get(0).number() == 77943)
+                continue;
+            else
+            {
+                int bondNumberHere = elements.get(i).getBonds().get(0).number();
+                for(int j = 0; j < bondNumberHere; ++j)
+                {
+                    double adaptiveSizing = - 10 - letterSize / 2 + startSize
+                            + 20.0/(bondNumberHere + 1) * (j + 1);
+                    context.strokeLine(100 + gap * i + letterSize, adaptiveSizing,
+                            startSize + gap * i + gap, adaptiveSizing);
+                }
+                tempBonds.get(0).end().draw(context, 100 + gap * (i+1), 100);
+            }
+            // this goes LEFT
+            if(tempBonds.get(1).end().isElement("C")
+                    || tempBonds.get(1).number() == 77943)
+                continue;
+            else
+            {
+                int bondNumberHere = elements.get(i).getBonds().get(1).number();
+                for(int j = 0; j < bondNumberHere; ++j)
+                {
+                    double adaptiveSizing = - 10 - letterSize / 2 + startSize
+                            + 20.0/(bondNumberHere + 1) * (j + 1);
+                    context.strokeLine(startSize + gap * i, adaptiveSizing,
+                            startSize + gap * (i-1) + letterSize, adaptiveSizing);
+                }
+                tempBonds.get(1).end().draw(context, 100 + gap * (i-1), 100);
+            }
+            // this goes UP
+            if(tempBonds.get(2).end().isElement("C")
+                    || tempBonds.get(2).number() == 77943)
+                continue;
+            else
+            {
+                int bondNumberHere = elements.get(i).getBonds().get(2).number();
+                for(int j = 0; j < bondNumberHere; ++j)
+                {
+                    double adaptiveSizing = - 10 + letterSize/2 + 20.0/(bondNumberHere + 1) * (j + 1);
+                    context.strokeLine(startSize + gap * i + adaptiveSizing, startSize-letterSize,
+                            startSize + gap * i + adaptiveSizing, startSize-gap);
+                }
+                tempBonds.get(2).end().draw(context, 100 + gap * i, 100 - gap);
+            }
+            // this goes DOWN
+            if(tempBonds.get(3).end().isElement("C")
+                    || tempBonds.get(3).number() == 77943)
+                continue;
+            else
+            {
+                int bondNumberHere = elements.get(i).getBonds().get(3).number();
+                for(int j = 0; j < bondNumberHere; ++j)
+                {
+                    double adaptiveSizing = - 10 + letterSize/2 + 20.0/(bondNumberHere + 1) * (j + 1);
+                    context.strokeLine(startSize + gap * i + adaptiveSizing, startSize,
+                            startSize + gap * i + adaptiveSizing, startSize+gap-letterSize);
+                }
+                tempBonds.get(3).end().draw(context, 100 + gap * i, 100 + gap);
+            }
         }
+        // now to draw the bonds
+
     }
 
     /**
@@ -34,12 +107,9 @@ public class Compound
     {
         for(Element ele : this.elements)
         {
-            if(ele.isElement("O") || ele.isElement("O"))
+            for(int i = 0; i < 4; ++i)
             {
-                while (ele.getBonds().size() < 4)
-                {
-                    ele.bondWith(new Element("H"), 1);
-                }
+                ele.bondWith(new Element("H"), 1, i);
             }
         }
     }
@@ -58,7 +128,7 @@ public class Compound
                     {
                         // if the suffix has dashes, skip them
                         if(name.charAt(start-1) == '-')
-                            parsePrefix(name.lastIndexOf('-', start-2)-1);
+                            parsePrefix(name.lastIndexOf('-', start-2));
                         else
                             parsePrefix(start);
                         fillMainC(); // also only fill in the carbon backbone once
@@ -68,8 +138,18 @@ public class Compound
                 }
             }
             if(found)
-                return;
+                break;
         }
+
+
+        this.elements.get(0).bondWith(this.elements.get(1), this.bondNumbers.get(0), 0);
+        for(int i = 1; i < this.elements.size()-1; ++i)
+        {
+            this.elements.get(i).bondWith(this.elements.get(i+1),this.bondNumbers.get(i), 0);
+            this.elements.get(i).bondWith(this.elements.get(i-1),this.bondNumbers.get(i-1), 1);
+        }
+        this.elements.get(this.elements.size()-1).bondWith(this.elements.get(this.elements.size()-2),
+                this.bondNumbers.get(this.elements.size()-2), 1);
     }
 
     /**
