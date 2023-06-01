@@ -132,4 +132,9 @@ public class Element
     {
         return this.name == nameList.seekByValue(name) || this.name == nameList.seekByKey(name);
     }
+
+    public int getBondCount()
+    {
+        return this.bondCount;
+    }
 }

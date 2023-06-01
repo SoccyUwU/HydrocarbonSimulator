@@ -26,12 +26,20 @@ public class Compound
 
     public void draw(GraphicsContext context)
     {
+        context.fillRect(0, 0, context.getCanvas().getWidth(), context.getCanvas().getHeight());
+        for(Element ele : elements)
+        {
+            if(ele.getBondCount() > 4)
+            {
+                context.strokeText("Invalid name: too many bonds",
+                        context.getCanvas().getWidth()/2, context.getCanvas().getHeight()/2);
+                return;
+            }
+        }
         for(int i = 0; i < elements.size(); ++i)
         {
             elements.get(i).draw(context, 100 + gap * i, 100);
             ArrayList<bondInfo> tempBonds = elements.get(i).getBonds();
-
-            // TODO: 2023-05-31 Finish this bond drawing to look good and apply on all bonds 
 
             // this goes RIGHT
             if(tempBonds.get(0).end().isElement("C")
@@ -96,8 +104,6 @@ public class Compound
                 tempBonds.get(3).end().draw(context, 100 + gap * i, 100 + gap);
             }
         }
-        // now to draw the bonds
-
     }
 
     /**

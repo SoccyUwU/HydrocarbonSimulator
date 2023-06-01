@@ -1,10 +1,11 @@
 package com.example.hydrocarbonsimulator;
 
 import javafx.application.Application;
+import javafx.event.*;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.GridPane;
+import javafx.scene.canvas.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -20,12 +21,20 @@ public class SimulatorMain extends Application
     @Override
     public void start(Stage stage)
     {
-        Canvas lewisCanvas = new Canvas(screenWidth, screenHeight);
-        GraphicsContext lewisContext = lewisCanvas.getGraphicsContext2D();
-
         GridPane base = new GridPane();
-        base.add(lewisCanvas, 0, 0);
         Scene scene = new Scene(base, screenWidth, screenHeight);
+
+        TextField nameBox = new TextField("Input hydrocarbon name here");
+        Button confirmButton = new Button("Generate");
+
+        HBox inputBox = new HBox();
+        inputBox.getChildren().addAll(nameBox, confirmButton);
+        base.add(inputBox, 0, 0);
+
+        Canvas lewisCanvas = new Canvas(screenWidth, screenHeight-nameBox.getHeight());
+        GraphicsContext lewisContext = lewisCanvas.getGraphicsContext2D();
+        base.add(lewisCanvas, 0, 1);
+
         stage.setTitle("test com");
         stage.setScene(scene);
         stage.show();
@@ -33,22 +42,24 @@ public class SimulatorMain extends Application
         Font elementFont = new Font(20);
         lewisContext.setFont(elementFont);
         lewisContext.setFill(Color.LIGHTPINK);
-        lewisContext.fillRect(0, 0, screenWidth, screenHeight);
+        lewisContext.fillRect(0, 0, lewisCanvas.getWidth(), lewisCanvas.getHeight());
 
-        // placeholder for now: to test parsing before making ui
-        String IUPACname = new String("hept-1,2-ene-5-yne");
-        Compound sample = new Compound();
+        EventHandler<ActionEvent> genNew = new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e)
+            {
+                // placeholder name
+                String IUPACname = new String("hept-1,2-ene-5-yne");
+                Compound sample = new Compound();
+                IUPACname = nameBox.getText();
+                IUPACname = removeSpace(IUPACname);
+                sample.name = IUPACname;
 
-        IUPACname = removeSpace(IUPACname);
-        sample.name = IUPACname;
-        lewisContext.strokeText("IUPAC name: " + IUPACname, 0, screenHeight-20);
-
-        sample.parseMainPath();
-        sample.populateH();
-        sample.draw(lewisContext);
-
-        // debug
-        System.out.println(sample.bondNumbers);
+                sample.parseMainPath();
+                sample.populateH();
+                sample.draw(lewisContext);
+            }
+        };
+        confirmButton.setOnAction(genNew);
     }
 
     public static void main(String[] args)
