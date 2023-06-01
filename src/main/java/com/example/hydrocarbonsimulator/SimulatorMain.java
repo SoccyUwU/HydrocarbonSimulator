@@ -54,7 +54,23 @@ public class SimulatorMain extends Application
                 IUPACname = removeSpace(IUPACname);
                 sample.name = IUPACname;
 
-                sample.parseMainPath();
+                if (sample.name.isEmpty())
+                {
+                    lewisContext.fillRect(0, 0, lewisCanvas.getWidth(), lewisCanvas.getHeight());
+                    lewisContext.strokeText("Please enter something",
+                            lewisCanvas.getWidth() / 2, lewisCanvas.getHeight() / 2);
+                    return;
+                }
+
+                try
+                {
+                    sample.parseMainPath();
+                }catch(InvalidParameterException err)
+                {
+                    lewisContext.strokeText("Invalid name, up to length 10 is supported",
+                            lewisCanvas.getWidth()/2, lewisCanvas.getHeight()/2);
+                    return;
+                }
                 sample.populateH();
                 sample.draw(lewisContext);
             }
@@ -79,6 +95,7 @@ public class SimulatorMain extends Application
             case "hex":
             case "hexa": return 6;
             case "hept": return 7;
+            case "octa":
             case "oct": return 8;
             case "non": return 9;
             case "dec": return 10;

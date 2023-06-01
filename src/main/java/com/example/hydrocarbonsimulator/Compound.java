@@ -133,8 +133,8 @@ public class Compound
                     if(!found) // only parse prefixes once
                     {
                         // if the suffix has dashes, skip them
-                        if(name.charAt(start-1) == '-')
-                            parsePrefix(name.lastIndexOf('-', start-2));
+                        if (name.charAt(start - 1) == '-')
+                            parsePrefix(name.lastIndexOf('-', start - 2));
                         else
                             parsePrefix(start);
                         fillMainC(); // also only fill in the carbon backbone once
@@ -148,14 +148,17 @@ public class Compound
         }
 
 
-        this.elements.get(0).bondWith(this.elements.get(1), this.bondNumbers.get(0), 0);
-        for(int i = 1; i < this.elements.size()-1; ++i)
+        if(this.elements.size() > 1)
         {
-            this.elements.get(i).bondWith(this.elements.get(i+1),this.bondNumbers.get(i), 0);
-            this.elements.get(i).bondWith(this.elements.get(i-1),this.bondNumbers.get(i-1), 1);
+            this.elements.get(0).bondWith(this.elements.get(1), this.bondNumbers.get(0), 0);
+            for (int i = 1; i < this.elements.size() - 1; ++i)
+            {
+                this.elements.get(i).bondWith(this.elements.get(i + 1), this.bondNumbers.get(i), 0);
+                this.elements.get(i).bondWith(this.elements.get(i - 1), this.bondNumbers.get(i - 1), 1);
+            }
+            this.elements.get(this.elements.size() - 1).bondWith(this.elements.get(this.elements.size() - 2),
+                    this.bondNumbers.get(this.elements.size() - 2), 1);
         }
-        this.elements.get(this.elements.size()-1).bondWith(this.elements.get(this.elements.size()-2),
-                this.bondNumbers.get(this.elements.size()-2), 1);
     }
 
     /**
@@ -169,12 +172,15 @@ public class Compound
     {
         try
         {
-            lengthMain = SimulatorMain.prefixToNum(name.substring(end-3, end));
+            lengthMain = SimulatorMain.prefixToNum(name.substring(end-4, end));
         } catch(InvalidParameterException damn)
         { // try again then with another length
-            lengthMain = SimulatorMain.prefixToNum(name.substring(end-4, end));
+            lengthMain = SimulatorMain.prefixToNum(name.substring(end-3, end));
             // I'm not catching because if both of these tries fail
             // something else probably did and I'm just gonna let the exception propagate
+        } catch(StringIndexOutOfBoundsException damn)
+        {
+            lengthMain = SimulatorMain.prefixToNum(name.substring(end-3, end));
         }
     }
 
