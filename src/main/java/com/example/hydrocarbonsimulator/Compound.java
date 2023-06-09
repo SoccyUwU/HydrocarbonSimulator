@@ -11,17 +11,17 @@ public class Compound
 {
     // note that bond numbers are counting from 1~2 as first, and thus
     // size is one less than elements.size()
-    ArrayList<Integer> bondNumbers = new ArrayList<Integer>();
-    int lengthMain = -1;
-    String name = "";
-    String[][] suffixList = {{"ane"}, {"ene", "yne"}};
+    protected ArrayList<Integer> bondNumbers = new ArrayList<Integer>();
+    protected int lengthMain = -1;
+    protected String name = "";
+    protected String[][] suffixList = {{"ane"}, {"ene", "yne"}, {"anol"}, {"enol", "ynol"}, {"one"}, {"al"}};
 
-    ArrayList<Element> elements = new ArrayList<Element>();
+    protected ArrayList<Element> elements = new ArrayList<Element>();
 
     // bunch of drawing related stuff
-    final static int gap = 68; // simon told me to use this number
-    final static int letterSize = 15; // looks nice
-    final static int startSize = 100; // looks nice
+    protected final static int gap = 100 - 38; // simon told me to use this number
+    protected final static int letterSize = 15; // looks nice
+    protected final static int startSize = 100; // looks nice
 
 
     public void draw(GraphicsContext context)
@@ -113,9 +113,10 @@ public class Compound
     {
         for(Element ele : this.elements)
         {
-            for(int i = 0; i < 4; ++i)
+            System.out.printf("C element has %d bonds before H\n", ele.getBondCount());
+            while(ele.getBondCount() < 4)
             {
-                ele.bondWith(new Element("H"), 1, i);
+                ele.bondWithNOW(new Element("H"), 1);
             }
         }
     }
@@ -138,6 +139,22 @@ public class Compound
                         else
                             parsePrefix(start);
                         fillMainC(); // also only fill in the carbon backbone once
+                        // populate with default values first
+                        for(int _k = 0; _k < lengthMain-1; ++_k)
+                            bondNumbers.add(1);
+                        if(this.elements.size() > 1)
+                        {
+                            this.elements.get(0).bondWith(this.elements.get(1), this.bondNumbers.get(0), 0);
+                            for (int k = 1; k < this.elements.size() - 1; ++k)
+                            {
+                                this.elements.get(k).bondWith(this.elements.get(k + 1),
+                                        this.bondNumbers.get(k), 0);
+                                this.elements.get(k).bondWith(this.elements.get(k - 1),
+                                        this.bondNumbers.get(k - 1), 1);
+                            }
+                            this.elements.get(this.elements.size() - 1).bondWith(this.elements.get(this.elements.size() - 2),
+                                    this.bondNumbers.get(this.elements.size() - 2), 1);
+                        }
                     }
                     found = true;
                     parseSpecificSuffix(i, j, start);
@@ -146,19 +163,19 @@ public class Compound
             if(found)
                 break;
         }
-
-
-        if(this.elements.size() > 1)
+        /*if(this.elements.size() > 1)
         {
             this.elements.get(0).bondWith(this.elements.get(1), this.bondNumbers.get(0), 0);
-            for (int i = 1; i < this.elements.size() - 1; ++i)
+            for (int k = 1; k < this.elements.size() - 1; ++k)
             {
-                this.elements.get(i).bondWith(this.elements.get(i + 1), this.bondNumbers.get(i), 0);
-                this.elements.get(i).bondWith(this.elements.get(i - 1), this.bondNumbers.get(i - 1), 1);
+                this.elements.get(k).bondWith(this.elements.get(k + 1),
+                        this.bondNumbers.get(k), 0);
+                this.elements.get(k).bondWith(this.elements.get(k - 1),
+                        this.bondNumbers.get(k - 1), 1);
             }
             this.elements.get(this.elements.size() - 1).bondWith(this.elements.get(this.elements.size() - 2),
                     this.bondNumbers.get(this.elements.size() - 2), 1);
-        }
+        }*/
     }
 
     /**
@@ -182,6 +199,8 @@ public class Compound
         {
             lengthMain = SimulatorMain.prefixToNum(name.substring(end-3, end));
         }
+        // DEBUG
+        System.out.printf("parsed length: %d\n", lengthMain);
     }
 
     private void fillMainC()
@@ -194,32 +213,61 @@ public class Compound
 
     private void parseSpecificSuffix(int level, int version, int index) throws IllegalArgumentException
     {
-        // populate with default values first
-        for(int i = 0; i < lengthMain; ++i)
-            bondNumbers.add(1);
+
         switch(level)
         {
             case 0: // alkane
                 // intentionally blank: no change needed
                 break;
             case 1: // alkene/alkyne
-                // if there's no number assume 1
-                if(name.charAt(index-1) != '-')
-                {
-                    bondNumbers.set(0, version+2);
-                    break;
-                }
-                else // otherwise parse numbers
-                {
-                    int start = name.lastIndexOf("-", index-2);
-                    ArrayList<Integer> indexList = SimulatorMain.parseCommaNumList(name.substring(start+1, index-1));
-                    for(int i : indexList)
-                    {
-                        bondNumbers.set(i-1, version+2);
-                    }
-                } break;
+                addDTbond(version, index); break;
+            case 2: // alcohol with alkane
+                parseHydroxylBond(version, index); break;
+            case 3: // alcohol with alkene/alkyne
+                addDTbond(version, index);
+                parseHydroxylBond(version, index); break;
             default: // PANIC
                 throw new IllegalArgumentException ("Specific suffix was not parsed");
+        }
+    }
+
+    private void addDTbond(int version, int index)
+    {
+        // if there's no number assume 1
+        if(name.charAt(index-1) != '-')
+        {
+            this.elements.get(0).updateBondNumber(version+2, 0);
+            this.elements.get(1).updateBondNumber(version+2, 1);
+            return;
+        }
+        else // otherwise parse numbers
+        {
+            int start = name.lastIndexOf("-", index-2);
+            ArrayList<Integer> indexList = SimulatorMain.parseCommaNumList(name.substring(start+1, index-1));
+            for(int i : indexList)
+            {
+                bondNumbers.set(i-1, version+2);
+                this.elements.get(i-1).updateBondNumber(version+2, 0);
+                this.elements.get(i).updateBondNumber(version+2, 1);
+            }
+        }
+    }
+
+    private void parseHydroxylBond(int version, int index)
+    {
+        // if there's no numbering assume 1
+        if(name.charAt(index-1) != '-')
+        {
+            elements.get(0).bondWithNOW(new Element("OH"), 1);
+        }
+        else
+        {
+            int start = name.lastIndexOf("-", index-2);
+            ArrayList<Integer> indexList = SimulatorMain.parseCommaNumList(name.substring(start+1, index-1));
+            for(int i : indexList)
+            {
+                elements.get(i-1).bondWithNOW(new Element("OH"), 1);
+            }
         }
     }
 }

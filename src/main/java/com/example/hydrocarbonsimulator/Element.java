@@ -3,7 +3,6 @@ package com.example.hydrocarbonsimulator;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 public class Element
@@ -64,7 +63,7 @@ public class Element
     public Element(String name) throws IllegalArgumentException
     {
         // if the dictionary isn't initialized: populate it
-        if(nameList.empty())
+        if(nameList.isEmpty())
         {
             // populate some bitches
             nameList.add("C", "Carbon");
@@ -74,6 +73,7 @@ public class Element
             nameList.add("Cl", "Chlorine");
             nameList.add("Br", "Bromine");
             nameList.add("I", "Iodine");
+            nameList.add("OH", "Hydroxyl");
         }
         // if the name is short: has to be abbreviation
         if(name.length() <= 2)
@@ -104,24 +104,84 @@ public class Element
     }
 
     /**
+     * Attempt to bond an element with another, only giving up if there is no space
      *
+     * Note that this does NOT care about position: use bondWith() if you do
      * @param bondElement
      * @param bondNumber
-     * @param position 0 is right 1 is left 2 is up 3 is down
-     * @throws IllegalStateException
+     * @return If the bond has been successful
      */
-    public void bondWith(Element bondElement, int bondNumber, int position) throws IllegalStateException
+    public boolean bondWithNOW(Element bondElement, int bondNumber)
     {
         // fill bonds if it's not already sized enough with garbage info
         while(this.bonds.size() < 4)
             this.bonds.add(new bondInfo(77943, new Element("O")));
-        if(this.bonded[position])
-            return; // do nothing if it's already bonded
+        // DEBUG
+        System.out.printf("ooo I wanna bond %s so bad ooo\n", bondElement.name);
+
+        for(int i = 0; i < 4; ++i)
+        {
+            if(!this.bonded[i])
+            {
+                this.bonds.set(i, new bondInfo(bondNumber, bondElement));
+                this.bonded[i] = true;
+                this.bondCount += bondNumber;
+                System.out.println("I bonded yippee");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean updateBondNumber(int bondNumber, int position)
+    {
+        //DEBUG
+        System.out.printf("Updating bind number of %s from %d to %d\n",
+                this.name, this.getBonds().get(position).number(), bondNumber);
+        if(this.bondCount + bondNumber - this.bonds.get(position).number() > 4)
+            return false;
+        this.bondCount -= this.bonds.get(position).number();
+        this.bonds.set(position, new bondInfo(bondNumber, this.bonds.get(position).end()));
+        this.bonded[position] = true;
+        this.bondCount += bondNumber;
+        return true;
+    }
+
+    /**
+     * Attempt to bond an element with another, but gives up if the position is taken
+     * @param bondElement
+     * @param bondNumber
+     * @param position 0 is right 1 is left 2 is up 3 is down
+     * @throws IllegalStateException
+     * @return If the bond has been successful
+     */
+    public boolean bondWith(Element bondElement, int bondNumber, int position) throws IllegalStateException
+    {
+        // fill bonds if it's not already sized enough with garbage info
+        while(this.bonds.size() < 4)
+            this.bonds.add(new bondInfo(77943, new Element("O")));
         if(this.bondCount >= 4)
-            return; // do nothing if bonds are full
+            return false; // do nothing if bonds are full
+        if(this.bonded[position] &&
+                !this.bonds.get(position).end().isElement(bondElement.getName()))
+            return false; // do nothing if it's already bonded and another attempt tries to bind differently
+        else if(this.bonded[position] && this.bonds.get(position).end().isElement(bondElement.getName()))
+        { // if the same bind is attempted again, update bind number when possible
+            //DEBUG
+            System.out.printf("Updating bind number of %s from %d to %d\n",
+                    this.name, this.getBonds().get(position).number(), bondNumber);
+            if(this.bondCount + bondNumber - this.bonds.get(position).number() > 4)
+                return false;
+            this.bondCount -= this.bonds.get(position).number();
+            this.bonds.set(position, new bondInfo(bondNumber, bondElement));
+            this.bonded[position] = true;
+            this.bondCount += bondNumber;
+            return true;
+        }
         this.bonds.set(position, new bondInfo(bondNumber, bondElement));
         this.bonded[position] = true;
         this.bondCount += bondNumber;
+        return true;
     }
     public ArrayList<bondInfo> getBonds()
     {
@@ -136,5 +196,18 @@ public class Element
     public int getBondCount()
     {
         return this.bondCount;
+    }
+    public void setBondCount(int value)
+    {
+        this.bondCount = value;
+    }
+    public void addBondCount(int value)
+    {
+        this.bondCount += value;
+    }
+
+    public String getName()
+    {
+        return this.name;
     }
 }

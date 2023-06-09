@@ -72,6 +72,15 @@ public class SimulatorMain extends Application
                     return;
                 }
                 sample.populateH();
+                //DEBUG
+                for(Element ele : sample.elements)
+                {
+                    System.out.printf("Element %s has final bonds:\n", ele.getName());
+                    for(bondInfo th : ele.getBonds())
+                    {
+                        System.out.println(th.end().getName()+th.number());
+                    }
+                }
                 sample.draw(lewisContext);
             }
         };
