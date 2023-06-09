@@ -14,7 +14,8 @@ public class Compound
     protected ArrayList<Integer> bondNumbers = new ArrayList<Integer>();
     protected int lengthMain = -1;
     protected String name = "";
-    protected String[][] suffixList = {{"ane"}, {"ene", "yne"}, {"anol"}, {"enol", "ynol"}, {"one"}, {"al"}};
+    protected String[][] suffixList = {{"ane"}, {"ene", "yne", "en", "yn"}, {"anol"},
+            {"enol", "ynol"}, {"ol"}, {"one"}, {"al"}};
 
     protected ArrayList<Element> elements = new ArrayList<Element>();
 
@@ -123,15 +124,17 @@ public class Compound
 
     public void parseMainPath()
     {
+        boolean prep = false;
         for(int i = 0; i < suffixList.length; ++i)
         {
-            boolean found = false;
             for(int j = 0; j < suffixList[i].length; ++j)
             {
-                int start = name.indexOf(suffixList[i][j]);
+                int start = name.lastIndexOf(suffixList[i][j]);
+                //DEBUG
+                System.out.println("start is " + start);
                 if(start != -1) // if any found
                 {
-                    if(!found) // only parse prefixes once
+                    if(!prep) // only parse prefixes once
                     {
                         // if the suffix has dashes, skip them
                         if (name.charAt(start - 1) == '-')
@@ -155,27 +158,14 @@ public class Compound
                             this.elements.get(this.elements.size() - 1).bondWith(this.elements.get(this.elements.size() - 2),
                                     this.bondNumbers.get(this.elements.size() - 2), 1);
                         }
+                        // DEBUG
+                        System.out.println("prep is done!");
+                        prep = true;
                     }
-                    found = true;
                     parseSpecificSuffix(i, j, start);
                 }
             }
-            if(found)
-                break;
         }
-        /*if(this.elements.size() > 1)
-        {
-            this.elements.get(0).bondWith(this.elements.get(1), this.bondNumbers.get(0), 0);
-            for (int k = 1; k < this.elements.size() - 1; ++k)
-            {
-                this.elements.get(k).bondWith(this.elements.get(k + 1),
-                        this.bondNumbers.get(k), 0);
-                this.elements.get(k).bondWith(this.elements.get(k - 1),
-                        this.bondNumbers.get(k - 1), 1);
-            }
-            this.elements.get(this.elements.size() - 1).bondWith(this.elements.get(this.elements.size() - 2),
-                    this.bondNumbers.get(this.elements.size() - 2), 1);
-        }*/
     }
 
     /**
@@ -220,8 +210,8 @@ public class Compound
                 // intentionally blank: no change needed
                 break;
             case 1: // alkene/alkyne
-                addDTbond(version, index); break;
-            case 2: // alcohol with alkane
+                addDTbond(version%2, index); break;
+            case 2, 4: // alcohol
                 parseHydroxylBond(version, index); break;
             case 3: // alcohol with alkene/alkyne
                 addDTbond(version, index);

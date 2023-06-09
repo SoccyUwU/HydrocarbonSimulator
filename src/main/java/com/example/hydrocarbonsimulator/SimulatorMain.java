@@ -62,15 +62,17 @@ public class SimulatorMain extends Application
                     return;
                 }
 
-                try
-                {
-                    sample.parseMainPath();
-                }catch(InvalidParameterException err)
-                {
-                    lewisContext.strokeText("Invalid name, up to length 10 is supported",
-                            lewisCanvas.getWidth()/2, lewisCanvas.getHeight()/2);
-                    return;
-                }
+                sample.parseMainPath();
+
+//                try
+//                {
+//                    sample.parseMainPath();
+//                }catch(InvalidParameterException err)
+//                {
+//                    lewisContext.strokeText("Invalid name, up to length 10 is supported",
+//                            lewisCanvas.getWidth()/2, lewisCanvas.getHeight()/2);
+//                    return;
+//                }
                 sample.populateH();
                 //DEBUG
                 for(Element ele : sample.elements)
