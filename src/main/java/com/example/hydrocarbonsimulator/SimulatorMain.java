@@ -1,3 +1,6 @@
+/**
+ * Invalid Names will result in Unspecified Behaviour
+ */
 package com.example.hydrocarbonsimulator;
 
 import javafx.application.Application;
@@ -63,22 +66,12 @@ public class SimulatorMain extends Application
                 }
 
                 sample.parseMainPath();
-
-//                try
-//                {
-//                    sample.parseMainPath();
-//                }catch(InvalidParameterException err)
-//                {
-//                    lewisContext.strokeText("Invalid name, up to length 10 is supported",
-//                            lewisCanvas.getWidth()/2, lewisCanvas.getHeight()/2);
-//                    return;
-//                }
                 sample.populateH();
                 //DEBUG
                 for(Element ele : sample.elements)
                 {
                     System.out.printf("Element %s has final bonds:\n", ele.getName());
-                    for(bondInfo th : ele.getBonds())
+                    for(BondInfo th : ele.getBonds())
                     {
                         System.out.println(th.end().getName()+th.number());
                     }

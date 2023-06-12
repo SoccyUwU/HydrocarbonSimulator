@@ -4,8 +4,6 @@ import javafx.scene.canvas.GraphicsContext;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class Compound
 {
@@ -14,8 +12,7 @@ public class Compound
     protected ArrayList<Integer> bondNumbers = new ArrayList<Integer>();
     protected int lengthMain = -1;
     protected String name = "";
-    protected String[][] suffixList = {{"ane"}, {"ene", "yne", "en", "yn"}, {"anol"},
-            {"enol", "ynol"}, {"ol"}, {"one"}, {"al"}};
+    protected String[][] suffixList = {{"ane", "an"}, {"ene", "en", "yne", "yn"}, {"ol"}, {"one"}, {"al"}};
 
     protected ArrayList<Element> elements = new ArrayList<Element>();
 
@@ -40,7 +37,7 @@ public class Compound
         for(int i = 0; i < elements.size(); ++i)
         {
             elements.get(i).draw(context, 100 + gap * i, 100);
-            ArrayList<bondInfo> tempBonds = elements.get(i).getBonds();
+            ArrayList<BondInfo> tempBonds = elements.get(i).getBonds();
 
             // this goes RIGHT
             if(tempBonds.get(0).end().isElement("C")
@@ -210,12 +207,13 @@ public class Compound
                 // intentionally blank: no change needed
                 break;
             case 1: // alkene/alkyne
-                addDTbond(version%2, index); break;
-            case 2, 4: // alcohol
-                parseHydroxylBond(version, index); break;
-            case 3: // alcohol with alkene/alkyne
-                addDTbond(version, index);
-                parseHydroxylBond(version, index); break;
+                addDTbond(version/2, index); break;
+            case 2: // alcohol
+                addHydroxylBond(index); break;
+            case 3: // ketone
+                addDoubleOBond(index); break;
+            case 4: // aldehyde
+                addAldBond(); break;
             default: // PANIC
                 throw new IllegalArgumentException ("Specific suffix was not parsed");
         }
@@ -228,7 +226,6 @@ public class Compound
         {
             this.elements.get(0).updateBondNumber(version+2, 0);
             this.elements.get(1).updateBondNumber(version+2, 1);
-            return;
         }
         else // otherwise parse numbers
         {
@@ -243,7 +240,7 @@ public class Compound
         }
     }
 
-    private void parseHydroxylBond(int version, int index)
+    private void addHydroxylBond(int index)
     {
         // if there's no numbering assume 1
         if(name.charAt(index-1) != '-')
@@ -259,5 +256,37 @@ public class Compound
                 elements.get(i-1).bondWithNOW(new Element("OH"), 1);
             }
         }
+    }
+
+    /**
+     *
+     * @param index
+     */
+    private void addDoubleOBond(int index)
+    {
+        // if there's no numbering assume 1
+        if(name.charAt(index-1) != '-')
+        {
+            if(elements.size() <= 2)
+            { // not big enough
+                // TODO: 2023-06-12 ADD CUSTOM ERROR TYPES
+                throw new IllegalArgumentException("No ketone on length 1 or 2");
+            }
+            elements.get(1).bondWithNOW(new Element("O"), 2);
+        }
+        else
+        {
+            int start = name.lastIndexOf("-", index-2);
+            ArrayList<Integer> indexList = SimulatorMain.parseCommaNumList(name.substring(start+1, index-1));
+            for(int i : indexList)
+            {
+                elements.get(i-1).bondWithNOW(new Element("O"), 2);
+            }
+        }
+    }
+
+    private void addAldBond()
+    {
+        elements.get(0).bondWithNOW(new Element("O"), 2);
     }
 }

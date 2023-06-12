@@ -9,7 +9,7 @@ public class Element
 {
 
     // in hydrocarbons we've learned, an element only connects to at most four other
-    private ArrayList<bondInfo> bonds = new ArrayList<>(4);
+    private ArrayList<BondInfo> bonds = new ArrayList<>(4);
     private boolean[] bonded = new boolean[]{false, false, false, false};
     private int bondCount = 0; // max is 4
     // note that keys are shorter (C, Ca, H) while values are full (Carbon, Calcium)
@@ -25,7 +25,7 @@ public class Element
      * @param b
      * @return
      */
-    private boolean compElement(bondInfo a, bondInfo b)
+    private boolean compElement(BondInfo a, BondInfo b)
     {
         int aNum, bNum;
         if(a.end().name == "C")
@@ -115,7 +115,7 @@ public class Element
     {
         // fill bonds if it's not already sized enough with garbage info
         while(this.bonds.size() < 4)
-            this.bonds.add(new bondInfo(77943, new Element("O")));
+            this.bonds.add(new BondInfo(77943, new Element("O")));
         // DEBUG
         System.out.printf("ooo I wanna bond %s so bad ooo\n", bondElement.name);
 
@@ -123,7 +123,7 @@ public class Element
         {
             if(!this.bonded[i])
             {
-                this.bonds.set(i, new bondInfo(bondNumber, bondElement));
+                this.bonds.set(i, new BondInfo(bondNumber, bondElement));
                 this.bonded[i] = true;
                 this.bondCount += bondNumber;
                 System.out.println("I bonded yippee");
@@ -141,7 +141,7 @@ public class Element
         if(this.bondCount + bondNumber - this.bonds.get(position).number() > 4)
             return false;
         this.bondCount -= this.bonds.get(position).number();
-        this.bonds.set(position, new bondInfo(bondNumber, this.bonds.get(position).end()));
+        this.bonds.set(position, new BondInfo(bondNumber, this.bonds.get(position).end()));
         this.bonded[position] = true;
         this.bondCount += bondNumber;
         return true;
@@ -159,7 +159,7 @@ public class Element
     {
         // fill bonds if it's not already sized enough with garbage info
         while(this.bonds.size() < 4)
-            this.bonds.add(new bondInfo(77943, new Element("O")));
+            this.bonds.add(new BondInfo(77943, new Element("O")));
         if(this.bondCount >= 4)
             return false; // do nothing if bonds are full
         if(this.bonded[position] &&
@@ -173,17 +173,17 @@ public class Element
             if(this.bondCount + bondNumber - this.bonds.get(position).number() > 4)
                 return false;
             this.bondCount -= this.bonds.get(position).number();
-            this.bonds.set(position, new bondInfo(bondNumber, bondElement));
+            this.bonds.set(position, new BondInfo(bondNumber, bondElement));
             this.bonded[position] = true;
             this.bondCount += bondNumber;
             return true;
         }
-        this.bonds.set(position, new bondInfo(bondNumber, bondElement));
+        this.bonds.set(position, new BondInfo(bondNumber, bondElement));
         this.bonded[position] = true;
         this.bondCount += bondNumber;
         return true;
     }
-    public ArrayList<bondInfo> getBonds()
+    public ArrayList<BondInfo> getBonds()
     {
         return this.bonds;
     }
